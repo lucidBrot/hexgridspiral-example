@@ -3,7 +3,7 @@ It is a separate repository because it has many additional dependencies (for the
 
 See the start of `src/main.rs` for an overview of the examples included.
 
-The webpage to showcase it will be available under https://lucidbrot.github.com/hexgridspiral-eample/
+The webpage to showcase is at https://lucidbrot.github.com/hexgridspiral-eample/
 
 ## Usage
 
