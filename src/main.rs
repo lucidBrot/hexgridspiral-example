@@ -16,6 +16,15 @@
 //!
 //! EXAMPLE 4:
 //! See how to compute coordinates based on the unit directions.
+//!
+//! EXAMPLE 5:
+//! Building to WASM works, but requires two settings because of a dependency. 
+//! See the Cargo.toml and .cargo/config.toml
+//! that this example project uses.
+//!
+//! Don't let all the bevy boilerplate code confuse you. 
+//! That is just the GUI library I am using.
+
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 use hexgridspiral as hgs;

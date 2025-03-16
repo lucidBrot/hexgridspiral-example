@@ -19,6 +19,7 @@ bevy = { version = "0.15.0", features = [
 # reduce bevy logging that is "not relevant for an end user"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
 
+# EXAMPLE 5:
 # A dependency _somewhere_ that does not play nicely with wasm.
 # https://docs.rs/getrandom/latest/getrandom/#webassembly-support
 # It needs the feature here, but also RUSTFLAGS='--cfg getrandom_backend="wasm_js"'
