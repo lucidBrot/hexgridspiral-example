@@ -5,11 +5,16 @@
 //!
 //! See in highlight_movement_range_on_tile_click the usage of movement_range to get all reachable
 //! tiles in two steps from the tile you clicked.
+//! Displayed in yellow.
+//!
+//! See highlight_axes_on_tile_click for how to check whether tiles are reachable by moving
+//! straight. Displayed as darker colors.
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 use hexgridspiral as hgs;
 
 const LEVELMAP_TILE_CIRCUMRADIUS: f32 = 50.0;
+const NUM_TILES: u64 = 79;
 
 fn main() {
     App::new()
@@ -42,7 +47,7 @@ fn setup(
     let step_size = 2. * tile_inradius + 3.;
 
     // Spawn some tiles with spiralling indices
-    for tile_index in 1..36 {
+    for tile_index in 1..NUM_TILES {
         spawn_tile_with_index(
             &mut commands,
             &hgs::TileIndex::from(tile_index),
