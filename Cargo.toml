@@ -1,0 +1,35 @@
+[package]
+name = "hexgridspiral-example"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Depend on hexgridspiral
+hexgridspiral = { version = "0.2.6" }
+
+
+# == Bevy Dependency ==
+# Bevy is a dependency for the UI.
+# Most of the text in this Cargo.toml deals with bevy, not with hexgridspiral.
+bevy = { version = "0.15.0", features = ["dynamic_linking", "serialize"] }
+# reduce bevy logging that is "not relevant for an end user"
+log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+# this was set to 1
+opt-level = 0
+
+# Enable a large amount of optimization in the dev profile for dependencies.
+[profile.dev.package."*"]
+opt-level = 3
+
+# If you want, you can also enable LTO (Link-Time-Optimization) for the actual release builds, to squeeze out even more performance at the cost of very slow compile times.
+# Here is a configuration for the most aggressive optimizations possible:
+[profile.release]
+# "fat" would be faster code but way slower build time.
+lto = "thin"
+opt-level = 3
+codegen-units = 1
+incremental = false
+debug = false
