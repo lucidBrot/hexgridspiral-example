@@ -3,9 +3,10 @@ It is a separate repository because it has many additional dependencies (for the
 
 See the start of `src/main.rs` for an overview of the examples included.
 
-The webpage to showcase it is wip.
+The webpage to showcase it will be available under https://lucidbrot.github.com/hexgridspiral-eample/
 
 ## Usage
+
 * Every tile shows its spiral index centered on the tile.
 * Every tile has the cube coordinates displayed further on the outside.
     * Top-Left: q
