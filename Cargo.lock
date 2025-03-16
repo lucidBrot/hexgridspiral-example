@@ -312,7 +312,6 @@ version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2eaad7fe854258047680c51c3cacb804468553c04241912f6254c841c67c0198"
 dependencies = [
- "bevy_dylib",
  "bevy_internal",
 ]
 
@@ -474,7 +473,6 @@ dependencies = [
  "bevy_reflect",
  "bevy_tasks",
  "bevy_utils",
- "serde",
  "uuid",
 ]
 
@@ -530,15 +528,6 @@ dependencies = [
  "bevy_utils",
  "const-fnv1a-hash",
  "sysinfo",
-]
-
-[[package]]
-name = "bevy_dylib"
-version = "0.15.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "381b2a0773cfe9d27256fba1e5005a14968b34f751c09397ee4e278f0fb235db"
-dependencies = [
- "bevy_internal",
 ]
 
 [[package]]
@@ -719,7 +708,6 @@ dependencies = [
  "bevy_reflect",
  "bevy_utils",
  "derive_more 1.0.0",
- "serde",
  "smol_str",
 ]
 
@@ -1043,7 +1031,6 @@ dependencies = [
  "nonmax",
  "radsort",
  "rectangle-pack",
- "serde",
 ]
 
 [[package]]
@@ -1126,7 +1113,6 @@ dependencies = [
  "bevy_reflect",
  "bevy_utils",
  "crossbeam-channel",
- "serde",
 ]
 
 [[package]]
@@ -1141,7 +1127,6 @@ dependencies = [
  "bevy_math",
  "bevy_reflect",
  "derive_more 1.0.0",
- "serde",
 ]
 
 [[package]]
@@ -1173,7 +1158,6 @@ dependencies = [
  "bytemuck",
  "derive_more 1.0.0",
  "nonmax",
- "serde",
  "smallvec",
  "taffy",
 ]
@@ -1219,7 +1203,6 @@ dependencies = [
  "bevy_reflect",
  "bevy_utils",
  "raw-window-handle",
- "serde",
  "smol_str",
 ]
 
@@ -1250,7 +1233,6 @@ dependencies = [
  "cfg-if",
  "crossbeam-channel",
  "raw-window-handle",
- "serde",
  "wasm-bindgen",
  "web-sys",
  "wgpu-types",
@@ -2117,8 +2099,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a49c392881ce6d5c3b8cb70f98717b7c07aabbdff06687b9030dbfbe2725f8"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi 0.13.3+wasi-0.2.2",
+ "wasm-bindgen",
  "windows-targets 0.52.6",
 ]
 
@@ -2370,6 +2354,7 @@ name = "hexgridspiral-example"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "getrandom 0.3.1",
  "hexgridspiral",
  "log",
 ]
@@ -3731,9 +3716,6 @@ name = "smallvec"
 version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fcf8323ef1faaee30a44a340193b1ac6814fd9b7b4e88e9d4519a3e4abe1cfd"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "smol_str"

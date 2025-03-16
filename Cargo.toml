@@ -11,9 +11,18 @@ hexgridspiral = { version = "0.2.6" }
 # == Bevy Dependency ==
 # Bevy is a dependency for the UI.
 # Most of the text in this Cargo.toml deals with bevy, not with hexgridspiral.
-bevy = { version = "0.15.0", features = ["dynamic_linking", "serialize"] }
+#
+# Note: the dynamic_linking feature flag is not supported for WASM builds. You cannot use it.
+bevy = { version = "0.15.0", features = [
+#"dynamic_linking"
+] }
 # reduce bevy logging that is "not relevant for an end user"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+
+# A dependency _somewhere_ that does not play nicely with wasm.
+# https://docs.rs/getrandom/latest/getrandom/#webassembly-support
+# It needs the feature here, but also RUSTFLAGS='--cfg getrandom_backend="wasm_js"'
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

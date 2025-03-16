@@ -1,0 +1,8 @@
+# cargo install wasm-server-runner
+# then this config makes cargo run use the server-runner if --target wasm32-unknown-unknown is specified
+# https://bevy-cheatbook.github.io/platforms/wasm.html
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"
+# The dependency getrandom needs this flag set, but only when the target is wasm32-unknown-unknown.
+# https://docs.rs/getrandom/latest/getrandom/#opt-in-backends
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"',]
