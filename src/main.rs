@@ -1,14 +1,21 @@
-//! Example to showcase hexgridspiral.
+//! Examples to showcase hexgridspiral.
+//! Search for EXAMPLE in this file.
 //!
+//! EXAMPLE 1:
 //! See in spawn_tile_with_index the line that uses [HGSTile::new] for how to easily compute
-//! the position of the hex tiles.
+//! the position of the hex tiles to arrange them in a spiral.
 //!
+//! EXAMPLE 2:
 //! See in highlight_movement_range_on_tile_click the usage of movement_range to get all reachable
 //! tiles in two steps from the tile you clicked.
 //! Displayed in yellow.
 //!
+//! EXAMPLE 3:
 //! See highlight_axes_on_tile_click for how to check whether tiles are reachable by moving
 //! straight. Displayed as darker colors.
+//!
+//! EXAMPLE 4:
+//! See how to compute coordinates based on the unit directions.
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 use hexgridspiral as hgs;
@@ -46,6 +53,7 @@ fn setup(
     let tile_inradius = RegularPolygon::new(LEVELMAP_TILE_CIRCUMRADIUS, 6).inradius();
     let step_size = 2. * tile_inradius + 3.;
 
+    // EXAMPLE 1:
     // Spawn some tiles with spiralling indices
     for tile_index in 1..NUM_TILES {
         spawn_tile_with_index(
@@ -69,6 +77,7 @@ fn spawn_tile_with_index(
     materials: &mut ResMut<Assets<ColorMaterial>>,
     shape: Handle<Mesh>,
 ) {
+    // EXAMPLE 1:
     // Use hexgridspiral to compute the position of every hex tile.
     let t = hgs::HGSTile::new(*tile_index)
         .cc()
@@ -87,11 +96,65 @@ fn spawn_tile_with_index(
         TileMarker(*tile_index),
     ));
     tile_node.with_children(|parent| {
+        // Tile Index text node
         parent.spawn((
             Text2d::new(format!("{}", tile_index)),
             TextColor(css::ALICE_BLUE.into()),
             // avoid z-fighting. The child transform is relative to the parent.
             Transform::from_xyz(0., 0., 0.0001),
+        ));
+
+        // Cube Coordinates text node
+        let cctile = hgs::CCTile::new(*tile_index);
+        let (q, r, s) = cctile.into_qrs_tuple();
+        let fontsize = 16.;
+
+        // EXAMPLE 4:
+        // Compute neighbouring tile positions to simplify placement of the text.
+        let tl_pos = (hgs::CCTile::unit(&hgs::RingCornerIndex::TOPLEFT))
+            .to_pixel((0., 0.), step_size as f64);
+        let r_pos =
+            (hgs::CCTile::unit(&hgs::RingCornerIndex::RIGHT)).to_pixel((0., 0.), step_size as f64);
+        let bl_pos = (hgs::CCTile::unit(&hgs::RingCornerIndex::BOTTOMLEFT))
+            .to_pixel((0., 0.), step_size as f64);
+        // only go less than half of the way toward the neightouring tile.
+        let distance = 0.33;
+
+        parent.spawn((
+            Text2d::new(format!("{q}")),
+            TextColor(css::GREEN.into()),
+            Transform::from_xyz(
+                distance * tl_pos.0 as f32,
+                distance * tl_pos.1 as f32,
+                0.0001,
+            ),
+            TextFont {
+                font_size: fontsize,
+                ..Default::default()
+            },
+        ));
+
+        parent.spawn((
+            Text2d::new(format!("{r}")),
+            TextColor(css::MEDIUM_TURQUOISE.into()),
+            Transform::from_xyz(distance * r_pos.0 as f32, distance * r_pos.1 as f32, 0.0001),
+            TextFont {
+                font_size: fontsize,
+                ..Default::default()
+            },
+        ));
+        parent.spawn((
+            Text2d::new(format!("{s}")),
+            TextColor(css::DEEP_PINK.into()),
+            Transform::from_xyz(
+                distance * bl_pos.0 as f32,
+                distance * bl_pos.1 as f32,
+                0.0001,
+            ),
+            TextFont {
+                font_size: fontsize,
+                ..Default::default()
+            },
         ));
     });
 
@@ -154,6 +217,7 @@ fn highlight_movement_range_on_tile_click(
     let (clicked_tile, clicked_material) = clicked.expect("Nothing was clicked?!");
     let selected_index: hgs::TileIndex = clicked_tile.0;
 
+    // EXAMPLE 2:
     // Compute all reachable tiles, using hexgridspiral.
     let cctile = hgs::CCTile::new(selected_index);
     let movement_range: hgs::MovementRange = cctile.movement_range(2);
@@ -208,6 +272,7 @@ fn highlight_axes_on_tile_click(
     for (tile_marker, material_handle) in q_all_tiles.iter() {
         let (qq, rr, ss) = hgs::CCTile::new(tile_marker.0).into_qrs_tuple();
 
+        // EXAMPLE 3:
         if qq == q || rr == r || ss == s {
             let mat = materials
                 .get_mut(material_handle)
