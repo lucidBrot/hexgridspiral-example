@@ -6,26 +6,28 @@ const LEVELMAP_TILE_CIRCUMRADIUS: f32 = 50.0;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((DefaultPlugins, MeshPickingPlugin))
         .add_systems(Startup, setup)
         .run();
 }
 
-/// Setup Bevy Camera
+/// Setup Bevy Camera.
+/// Spawn a few hexagonal tiles.
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    // Camera with bluewhite background color.
     commands.spawn((
         Camera2d,
         Camera {
-            // clear the whole viewport with the given color
             clear_color: ClearColorConfig::Custom(Color::srgb(0.9, 0.9, 1.0)),
             ..Default::default()
         },
     ));
 
+    // Compute reusable shape
     let shape = meshes.add(RegularPolygon::new(LEVELMAP_TILE_CIRCUMRADIUS, 6));
 
     // Compute step-size from tile center to tile center, given the circumradius of a tile.
@@ -33,15 +35,14 @@ fn setup(
     let step_size = 2. * tile_inradius + 3.;
 
     // Spawn some tiles with spiralling indices
-   for tile_index in 1..36 {
-
-       spawn_tile_with_index(
-           &mut commands,
-           &hgs::TileIndex::from(tile_index),
-           step_size,
-           &mut materials,
-           shape.clone(),
-       );
+    for tile_index in 1..36 {
+        spawn_tile_with_index(
+            &mut commands,
+            &hgs::TileIndex::from(tile_index),
+            step_size,
+            &mut materials,
+            shape.clone(),
+        );
     }
 }
 
@@ -56,14 +57,17 @@ fn spawn_tile_with_index(
     materials: &mut ResMut<Assets<ColorMaterial>>,
     shape: Handle<Mesh>,
 ) {
+    // Use hexgridspiral to compute the position of every hex tile.
     let t = hgs::HGSTile::new(*tile_index)
         .cc()
         .to_pixel((0., 0.), step_size.into());
     let position = Vec3::new(t.0 as f32, t.1 as f32, 0.);
 
-   let color_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
-   let color_handle = materials.add(color_blue);
+    // Create a blue material that later gets modified to green on hover.
+    let color_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
+    let color_handle = materials.add(color_blue);
 
+    // Create a hexagonal tile with a text as child node.
     let mut tile_node = commands.spawn((
         Mesh2d(shape),
         MeshMaterial2d(color_handle.clone()),
@@ -81,12 +85,11 @@ fn spawn_tile_with_index(
 
     // on hover, change color
     tile_node.observe(
-        move |over: Trigger<Pointer<Over>>, mut q: Query<(
-                &LevelmapTileMarker,
-            ) >,
-                mut materials: ResMut<Assets<ColorMaterial>>,
-            | {
-            let ( index, ) = q
+        move |over: Trigger<Pointer<Over>>,
+              mut q: Query<(&LevelmapTileMarker,)>,
+              mut materials: ResMut<Assets<ColorMaterial>>| {
+            log::debug!("Hovering.");
+            let (index,) = q
                 .get_mut(over.entity())
                 .expect("Entity that was hovered over no longer seems to exist...");
             log::debug!("Labelmap Tile {} hover", index.0);
