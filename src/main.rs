@@ -1,3 +1,10 @@
+//! Example to showcase hexgridspiral.
+//!
+//! See in spawn_tile_with_index the line that uses [HGSTile::new] for how to easily compute
+//! the position of the hex tiles.
+//!
+//! See in highlight_movement_range_on_tile_click the usage of movement_range to get all reachable
+//! tiles in two steps from the tile you clicked.
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 use hexgridspiral as hgs;
@@ -47,7 +54,7 @@ fn setup(
 }
 
 #[derive(Component)]
-struct LevelmapTileMarker(hgs::TileIndex);
+struct TileMarker(hgs::TileIndex);
 
 // This is a normal function, not a bevy system.
 fn spawn_tile_with_index(
@@ -72,7 +79,7 @@ fn spawn_tile_with_index(
         Mesh2d(shape),
         MeshMaterial2d(color_handle.clone()),
         Transform::from_translation(position),
-        LevelmapTileMarker(*tile_index),
+        TileMarker(*tile_index),
     ));
     tile_node.with_children(|parent| {
         parent.spawn((
@@ -84,36 +91,82 @@ fn spawn_tile_with_index(
     });
 
     // on hover, change color
+    let mut color_handle1 = color_handle.clone();
     tile_node.observe(
         move |over: Trigger<Pointer<Over>>,
-              mut q: Query<(&LevelmapTileMarker,)>,
+              mut q: Query<(&TileMarker,)>,
               mut materials: ResMut<Assets<ColorMaterial>>| {
-            log::debug!("Hovering.");
             let (index,) = q
                 .get_mut(over.entity())
                 .expect("Entity that was hovered over no longer seems to exist...");
             log::debug!("Labelmap Tile {} hover", index.0);
             let color_green = Color::hsl(360. * 4. / 8. as f32, 0.95, 0.7);
-            // Assumption that there is always a material associated with the LevelmapTileMarker
+            // Assumption that there is always a material associated with the TileMarker
             // Entity.
-            let color_material = materials.get_mut(&mut color_handle.clone()).unwrap();
+            let color_material = materials.get_mut(&mut color_handle1).unwrap();
             color_material.color = color_green;
         },
     );
-    /*
 
-    // on unhover, remove outline
+    // on unhover, remove color change
+    let mut color_handle2 = color_handle.clone();
     tile_node.observe(
-        |out: Trigger<Pointer<Out>>, mut q: Query<(&mut bpl::Stroke, &LevelmapTileMarker)>| {
-            let res = q
+        move |out: Trigger<Pointer<Out>>,
+              mut q: Query<(&TileMarker,)>,
+              mut materials: ResMut<Assets<ColorMaterial>>| {
+            let (index,) = q
                 .get_mut(out.entity())
                 .expect("Entity that was hovered over no longer seems to exist...");
-            let mut stroke = res.0;
-            log::debug!("Labelmap Tile {} unhover", res.1 .0);
-            stroke.color = CC::COOLORS_BIOLET;
+            log::debug!("Labelmap Tile {} hover", index.0);
+            let color_material = materials
+                .get_mut(&mut color_handle2)
+                .expect("A tile without color?!");
+            let color_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
+            color_material.color = color_blue;
         },
     );
 
-    tile_node.observe(observer_on_tile_click);
-    */
+    tile_node.observe(highlight_movement_range_on_tile_click);
+}
+
+fn highlight_movement_range_on_tile_click(
+    trigger: Trigger<Pointer<Click>>,
+    mut q_all_tiles: Query<(&TileMarker, &mut MeshMaterial2d<ColorMaterial>)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // Check the current tile's index
+    let clicked = q_all_tiles.get(trigger.entity());
+    let (clicked_tile, clicked_material) = clicked.expect("Nothing was clicked?!");
+    let selected_index: hgs::TileIndex = clicked_tile.0;
+
+    // Compute all reachable tiles, using hexgridspiral.
+    let cctile = hgs::CCTile::new(selected_index);
+    let movement_range: hgs::MovementRange = cctile.movement_range(2);
+
+    // Reset all tiles' colors to plain blue
+    // Except if they are in reachable range
+    for (tile_marker, material_handle) in q_all_tiles.iter() {
+        let tile_index = tile_marker.0;
+
+        if movement_range.contains(&hgs::CCTile::new(tile_index)) {
+            let color_reachable_yellow = Color::hsl(360. * 1. / 8. as f32, 0.95, 0.7);
+            materials
+                .get_mut(material_handle)
+                .expect("A tile without color?!")
+                .color = color_reachable_yellow;
+        } else {
+            let color_plain_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
+            materials
+                .get_mut(material_handle)
+                .expect("A tile without color?!")
+                .color = color_plain_blue;
+        }
+    }
+
+    // Set the clicked tile to yet another color
+    let color_clicked_lime = Color::hsl(360. * 2. / 8. as f32, 0.95, 0.7);
+    materials
+        .get_mut(&clicked_material.0)
+        .expect("A tile without color?!")
+        .color = color_clicked_lime;
 }
