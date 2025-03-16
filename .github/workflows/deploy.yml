@@ -33,8 +33,8 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
       - name: Run trunk build
-         #run: RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk build --public-url "/jigsaw" --release
-         run: trunk build
+        run: trunk build
+        #run: RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk build --public-url "/jigsaw" --release
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
