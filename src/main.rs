@@ -27,22 +27,21 @@ fn setup(
     ));
 
     let shape = meshes.add(RegularPolygon::new(LEVELMAP_TILE_CIRCUMRADIUS, 6));
-    let color_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
-    let color_handle = materials.add(color_blue);
 
     // Compute step-size from tile center to tile center, given the circumradius of a tile.
     let tile_inradius = RegularPolygon::new(LEVELMAP_TILE_CIRCUMRADIUS, 6).inradius();
     let step_size = 2. * tile_inradius + 3.;
 
     // Spawn some tiles with spiralling indices
-    for tile_index in 1..36 {
-        spawn_tile_with_index(
-            &mut commands,
-            &hgs::TileIndex::from(tile_index),
-            step_size,
-            color_handle.clone(),
-            shape.clone(),
-        );
+   for tile_index in 1..36 {
+
+       spawn_tile_with_index(
+           &mut commands,
+           &hgs::TileIndex::from(tile_index),
+           step_size,
+           &mut materials,
+           shape.clone(),
+       );
     }
 }
 
@@ -54,7 +53,7 @@ fn spawn_tile_with_index(
     commands: &mut Commands,
     tile_index: &hgs::TileIndex,
     step_size: f32,
-    material_handle: Handle<ColorMaterial>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
     shape: Handle<Mesh>,
 ) {
     let t = hgs::HGSTile::new(*tile_index)
@@ -62,9 +61,12 @@ fn spawn_tile_with_index(
         .to_pixel((0., 0.), step_size.into());
     let position = Vec3::new(t.0 as f32, t.1 as f32, 0.);
 
+   let color_blue = Color::hsl(360. * 5. / 8. as f32, 0.95, 0.7);
+   let color_handle = materials.add(color_blue);
+
     let mut tile_node = commands.spawn((
         Mesh2d(shape),
-        MeshMaterial2d(material_handle),
+        MeshMaterial2d(color_handle.clone()),
         Transform::from_translation(position),
         LevelmapTileMarker(*tile_index),
     ));
@@ -77,17 +79,25 @@ fn spawn_tile_with_index(
         ));
     });
 
-    /*
-    // on hover, add outline
+    // on hover, change color
     tile_node.observe(
-        |over: Trigger<Pointer<Over>>, mut q: Query<(&mut bpl::Stroke, &LevelmapTileMarker)>| {
-            let (mut stroke, ref index) = q
+        move |over: Trigger<Pointer<Over>>, mut q: Query<(
+                &LevelmapTileMarker,
+            ) >,
+                mut materials: ResMut<Assets<ColorMaterial>>,
+            | {
+            let ( index, ) = q
                 .get_mut(over.entity())
                 .expect("Entity that was hovered over no longer seems to exist...");
             log::debug!("Labelmap Tile {} hover", index.0);
-            stroke.color = CC::GREENBLUEISH;
+            let color_green = Color::hsl(360. * 4. / 8. as f32, 0.95, 0.7);
+            // Assumption that there is always a material associated with the LevelmapTileMarker
+            // Entity.
+            let color_material = materials.get_mut(&mut color_handle.clone()).unwrap();
+            color_material.color = color_green;
         },
     );
+    /*
 
     // on unhover, remove outline
     tile_node.observe(
